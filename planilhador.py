@@ -16,7 +16,8 @@ class PlanilhaUpdater():
 		self.gc = self.login_gc(json_file=os.path.join(user_folder, "credentials.json"))
 
 		# saved user params 
-		with open(os.path.join(user_folder, "params.json")) as f:
+		self.params_path = os.path.join(user_folder, "params.json")
+		with open(self.params_path) as f:
 			self.user_params = json.loads(f.read())
 
 		# sheet
@@ -26,6 +27,10 @@ class PlanilhaUpdater():
 		self.nu = Nubank()
 		self.nu_cert_file = os.path.join(user_folder, "cert.p12")
 		
+	def save_state(self):
+		with open(self.params_path) as f:
+			f.write(json.dumps(self.user_params))
+
 	def set_br(self):
 		# Set locale
 		# nt = windows, posix=linux
@@ -144,7 +149,5 @@ class PlanilhaUpdater():
 			else:
 				table.append_row(entry, table_range=range_in, value_input_option='USER_ENTERED')
 
-# %%
-pedro = PlanilhaUpdater(r"C:\Users\Pedro\Desktop\planilhador\users\Pedro")
-pedro.insert_statements(last_date=datetime(2021,6,1))
-# %%
+		# Save last time this was called
+		self.user_params["last_date"] = datetime.now()
