@@ -11,14 +11,17 @@ import locale
 
 class PlanilhaUpdater():
 	def __init__(self, user_folder):
+		# Set locale
 		self.set_br()
+
+		self.user_name = os.path.split(user_folder)[-1]
+
 		# login google sheets
 		self.gc = self.login_gc(json_file=os.path.join(user_folder, "credentials.json"))
 
 		# saved user params 
 		self.params_path = os.path.join(user_folder, "params.json")
-		with open(self.params_path) as f:
-			self.user_params = json.loads(f.read())
+		self.load_state()
 
 		# sheet
 		self.sheet = self.gc.open(self.user_params["sheet"])
@@ -27,8 +30,16 @@ class PlanilhaUpdater():
 		self.nu = Nubank()
 		self.nu_cert_file = os.path.join(user_folder, "cert.p12")
 		
-	def save_state(self):
+	def load_state(self):
 		with open(self.params_path) as f:
+			self.user_params = json.loads(f.read())
+			if self.user_params.get("last_date"):
+				self.user_params["last_date"] = datetime.fromisoformat(self.user_params["last_date"])
+
+	def save_state(self):
+		with open(self.params_path, "w") as f:
+			if self.user_params.get("last_date"):
+				self.user_params["last_date"] = self.user_params["last_date"].isoformat()
 			f.write(json.dumps(self.user_params))
 
 	def set_br(self):
@@ -98,13 +109,14 @@ class PlanilhaUpdater():
 		return isDebit, entry
 
 	def insert_statements(self, last_date=None, include_credit=True, include_debit=True, **kwargs):
+		print(f"Inserting statements for user {self.user_name}")
 		# Auth
 		nu = Nubank()
 		nu.authenticate_with_refresh_token(self.user_params["token"], self.nu_cert_file)
 
 		# Since when
 		if last_date is None:
-			last_date = self.user_params.get("last_update", datetime(2021, 6, 14))
+			last_date = self.user_params.get("last_date", datetime(2021, 6, 14))
 
 		# List of entries to post
 		entries = []
@@ -122,7 +134,7 @@ class PlanilhaUpdater():
 				try:
 					date = datetime.strptime(statement.get("postDate"), "%Y-%m-%d") #2021-04-21T10:01:48Z
 				except:
-					print("did not get postDate... dont know what to do")
+					print(f"Did not get date for statement for user {self.user_name}. Skipping statement:{statement}")
 					continue
 
 				if date >= last_date:
@@ -133,6 +145,11 @@ class PlanilhaUpdater():
 
 		entries = sorted(entries, key=lambda x:x[2][1])
 		table = None
+		if len(entries) == 0:
+			print(f"No entries to update for user {self.user_name}.")
+			return
+
+		print(f"Inserting {len(entries)} lines in sheet {self.sheet.title} for user {self.user_name}.")
 		for isDebit, month, entry in entries:
 			if  (table is None) or (table.title != month):
 				try:
