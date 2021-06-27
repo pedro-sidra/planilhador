@@ -22,7 +22,7 @@ sudo apt-get install mutt
 ## Configure
 After installation, there are some things to configure.
 
-First of all, navigate to this repo`s folder, e.g.:
+* First of all, navigate to this repo`s folder, e.g.:
 
 ```
 cd /path/to/planilhador
