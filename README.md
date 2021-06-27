@@ -29,14 +29,22 @@ cd /path/to/planilhador
 ```
 
 * Add users of the system. The following script will guide you through the process:
-    `python3 add_user.py`
+    ```
+    python3 add_user.py
+    ```
    
 **(for linux machines:)**
 * Configure log folders and create `job.sh`:
-    `bash install.sh`
+    ```
+    bash install.sh
+    ```
 * Edit the ~/.muttrc file with your email credentials. If you use gmail, follow [this tutorial](https://linuxconfig.org/how-to-install-configure-and-use-mutt-with-a-gmail-account-on-linux)
 * Configure crontab to run `job.sh` daily:
-    `crontab -e`
+    ```
+    crontab -e
+    ```
     and insert the following line at the end of the file:
-    `0 0 * * * /home/pi/planilhador/job.sh`
+    ```
+    0 0 * * * /home/pi/planilhador/job.sh
+    ```
     (runs job.sh every day at midnight)
