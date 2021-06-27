@@ -43,8 +43,14 @@ cd /path/to/planilhador
     ```
     crontab -e
     ```
-    and insert the following line at the end of the file:
+    and insert the following line at the end of the file, replacing /path/to/planilhador with the correct path to this repo:
     ```
-    0 0 * * * /home/pi/planilhador/job.sh
+    0 0 * * * /path/to/planilhador/job.sh
     ```
     (runs job.sh every day at midnight)
+
+**(for windows machines:)**
+I don't know how to schedule and send emails automatically in windows, but you can update your sheets manually with:
+```
+python3 job.py
+```
