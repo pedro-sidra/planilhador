@@ -1,4 +1,5 @@
 myenv/
 users/
 __pycache__/
+log/
 job.sh
