@@ -167,7 +167,7 @@ class PlanilhaUpdater():
 				table.append_row(entry, table_range=range_out, value_input_option='USER_ENTERED')
 			else:
 				table.append_row(entry, table_range=range_in, value_input_option='USER_ENTERED')
-			print(f"Inserted: {entry}")
+			# print(f"Inserted: {entry}")
 
 		# Save last time this was called
 		self.user_params["last_date"] = datetime.now()
