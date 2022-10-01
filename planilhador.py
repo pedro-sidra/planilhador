@@ -1,5 +1,6 @@
 #%%
 from datetime import datetime
+import time
 import json
 from pynubank import Nubank, MockHttpClient
 import re
@@ -112,7 +113,7 @@ class PlanilhaUpdater():
 		print(f"Inserting statements for user {self.user_name}")
 		# Auth
 		nu = Nubank()
-		nu.authenticate_with_refresh_token(self.user_params["token"], self.nu_cert_file)
+		nu.authenticate_with_cert(self.user_params["cpf"], self.user_params["senha"], self.nu_cert_file)
 
 		# Since when
 		if last_date is None:
@@ -123,11 +124,14 @@ class PlanilhaUpdater():
 
 		if include_credit:
 			for statement in nu.get_card_statements():
-				date = datetime.strptime(statement["time"], "%Y-%m-%dT%H:%M:%SZ") #2021-04-21T10:01:48Z
+				try:
+					date = datetime.strptime(statement["time"], "%Y-%m-%dT%H:%M:%SZ") #2021-04-21T10:01:48Z
+				except ValueError:
+					date = datetime.strptime(statement["time"], "%Y-%m-%dT%H:%M:%S.%fZ") #2021-04-21T10:01:48.233Z
 
 				if date > last_date:
 					entry = [statement["description"],date.strftime("%d/%m"), f"{str(statement['amount']/100).replace('.',',')}", "crédito", "",statement["title"] ]
-					entries.append((True, date.strftime("%B"), entry))
+					entries.append((True, date.strftime("%b"), entry))
 		
 		if include_debit:
 			for statement in nu.get_account_statements():
@@ -141,7 +145,7 @@ class PlanilhaUpdater():
 					isDebit, entry = self.get_entry(statement)
 					if entry[0] == "Boleto Cartão Nubank":
 						continue
-					entries.append((isDebit, date.strftime("%B"), entry))
+					entries.append((isDebit, date.strftime("%b"), entry))
 
 		entries = sorted(entries, key=lambda x:x[2][1])
 		table = None
@@ -163,6 +167,7 @@ class PlanilhaUpdater():
 
 			range_out = f"F1:J{table.row_count-2}"
 			range_in = f"A1:D{table.row_count-2}"
+			time.sleep(1)
 			if isDebit:
 				table.append_row(entry, table_range=range_out, value_input_option='USER_ENTERED')
 			else:
