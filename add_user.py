@@ -41,6 +41,6 @@ if __name__=="__main__":
 	sheet_name = input("Digite aqui o nome da planilha(incluindo pastas)")
 
 	# SAVE
-	user_params = dict(token=refresh, sheet=sheet_name)
+	user_params = dict(token=refresh, sheet=sheet_name, cpf=cpf, senha=senha)
 	with open("params.json", "w") as f:
 		f.write(json.dumps(user_params))
